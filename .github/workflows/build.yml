@@ -1,0 +1,35 @@
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk AutoTapper.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AutoTapper-apk
+          path: AutoTapper.apk
+      # 폰에서 링크 하나로 바로 받을 수 있게 Releases에 APK 올리기
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: 자동 탭 APK (최신)
+          body: 폰에서 AutoTapper.apk 를 눌러 다운로드 → 설치하세요.
+          files: AutoTapper.apk
+          make_latest: true

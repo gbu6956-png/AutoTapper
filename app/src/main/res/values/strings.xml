@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">자동 탭</string>
+    <string name="a11y_desc">화면에서 지정한 이미지를 찾으면 그 위치를 자동으로 탭합니다. 탭 입력에만 사용합니다.</string>
+</resources>
