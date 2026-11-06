@@ -19,10 +19,23 @@ android {
         }
     }
 
+    // 항상 같은 키로 서명 → 새 버전을 지우지 않고 덮어 설치 가능
+    signingConfigs {
+        create("fixed") {
+            storeFile = file("autotap.keystore")
+            storePassword = "autotap123"
+            keyAlias = "autotap"
+            keyPassword = "autotap123"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("fixed")
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("fixed")
         }
     }
 
