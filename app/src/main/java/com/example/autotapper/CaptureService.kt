@@ -84,6 +84,7 @@ class CaptureService : Service() {
     private var frames = 0
     private var procSum = 0L
     private var taps = 0L
+    private var seen = 0L
     private var statWindowStart = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -99,7 +100,7 @@ class CaptureService : Service() {
     private fun start(intent: Intent) {
         if (running) return
         // Android 14+: getMediaProjection 전에 반드시 foreground 시작
-        val notif = buildNotification()
+        val notif = buildNotification("시작 중…")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
         } else {
@@ -163,7 +164,20 @@ class CaptureService : Service() {
         status = "실행 중 – 타겟 크기 찾는 중… (게임 화면으로 이동하세요)"
     }
 
+    private var lastNotifAt = 0L
+    private var lastNotifText = ""
+
     private fun processFrame(r: ImageReader) {
+        processInner(r)
+        // 알림창에 현재 상태 표시 (1초마다)
+        val now = SystemClock.uptimeMillis()
+        if (now - lastNotifAt >= 1000 && status != lastNotifText && running) {
+            lastNotifAt = now; lastNotifText = status
+            getSystemService(NotificationManager::class.java).notify(NOTIF_ID, buildNotification(status))
+        }
+    }
+
+    private fun processInner(r: ImageReader) {
         val image = try { r.acquireLatestImage() } catch (e: Exception) { null } ?: return
         val t0 = SystemClock.uptimeMillis()
         try {
@@ -209,6 +223,7 @@ class CaptureService : Service() {
         }
 
         det.detect(frame, found)
+        seen += found.size
         val now = SystemClock.uptimeMillis()
         val p = prefs ?: return
         if (found.isNotEmpty()) {
@@ -247,12 +262,12 @@ class CaptureService : Service() {
             val fps = frames * 1000f / (now - statWindowStart)
             val avg = if (frames > 0) procSum.toFloat() / frames else 0f
             val a11y = if (TapService.instance == null) " ⚠ 접근성 꺼짐" else ""
-            status = "실행 중 – ${"%.0f".format(fps)}fps, 인식 ${"%.1f".format(avg)}ms, 누른 횟수 $taps$a11y"
+            status = "실행 중 – ${"%.0f".format(fps)}fps, 처리 ${"%.1f".format(avg)}ms\n두더지 발견 ${seen}번 / 누름 ${taps}번$a11y"
             frames = 0; procSum = 0; statWindowStart = now
         }
     }
 
-    private fun buildNotification(): Notification {
+    private fun buildNotification(text: String): Notification {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(NotificationChannel(CHANNEL, "자동 탭 실행 중", NotificationManager.IMPORTANCE_LOW))
         val stopPi = PendingIntent.getService(
@@ -265,7 +280,9 @@ class CaptureService : Service() {
         return Notification.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.ic_menu_view)
             .setContentTitle("자동 탭 실행 중")
-            .setContentText("타겟 이미지가 보이면 바로 탭합니다")
+            .setContentText(text)
+            .setStyle(Notification.BigTextStyle().bigText(text))
+            .setOnlyAlertOnce(true)
             .setContentIntent(openPi)
             .setOngoing(true)
             .addAction(Notification.Action.Builder(null, "중지", stopPi).build())

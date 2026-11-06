@@ -11,8 +11,8 @@ class Prefs(context: Context) {
 
     /** 일치도 기준 (50~99 %) — 높을수록 엄격 */
     var thresholdPct: Int
-        get() = sp.getInt("threshold", 80)
-        set(v) = sp.edit().putInt("threshold", v.coerceIn(50, 99)).apply()
+        get() = sp.getInt("threshold2", 70)
+        set(v) = sp.edit().putInt("threshold2", v.coerceIn(40, 99)).apply()
 
     /** 같은 자리를 다시 누르기 전 대기시간(ms) */
     var cooldownMs: Int
@@ -26,8 +26,8 @@ class Prefs(context: Context) {
 
     /** 탭 누름 시간(ms) */
     var tapMs: Int
-        get() = sp.getInt("tapMs", 5)
-        set(v) = sp.edit().putInt("tapMs", v.coerceIn(1, 500)).apply()
+        get() = sp.getInt("tapMs2", 40)
+        set(v) = sp.edit().putInt("tapMs2", v.coerceIn(1, 500)).apply()
 
     /** 색상까지 비교 (느리지만 색만 다른 가짜 아이콘을 구분) */
     var useColor: Boolean
@@ -36,8 +36,8 @@ class Prefs(context: Context) {
 
     /** 여러 개를 동시에(멀티터치) 탭 / 끄면 아주 짧은 간격으로 하나씩 */
     var simultaneous: Boolean
-        get() = sp.getBoolean("simultaneous", true)
-        set(v) = sp.edit().putBoolean("simultaneous", v).apply()
+        get() = sp.getBoolean("simultaneous2", false)
+        set(v) = sp.edit().putBoolean("simultaneous2", v).apply()
 
     companion object {
         const val CUSTOM_FILE = "custom_target.png"

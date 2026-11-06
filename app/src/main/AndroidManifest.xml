@@ -21,6 +21,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".TestActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" />
+
         <!-- 화면 캡처 + 이미지 인식 -->
         <service
             android:name=".CaptureService"

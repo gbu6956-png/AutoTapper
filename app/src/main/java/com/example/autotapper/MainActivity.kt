@@ -156,10 +156,10 @@ class MainActivity : ComponentActivity() {
         button("기본 이미지로 되돌리기") { File(filesDir, Prefs.CUSTOM_FILE).delete(); refreshPreview() }
 
         text("설정", 17f, true)
-        thresholdEdit = numberRow("일치도 기준 % (높을수록 엄격, 기본 80)", prefs.thresholdPct)
+        thresholdEdit = numberRow("일치도 기준 % (못 찾으면 낮추기, 기본 70)", prefs.thresholdPct)
         cooldownEdit = numberRow("같은 자리 재탭 대기 ms (기본 120)", prefs.cooldownMs)
         downscaleEdit = numberRow("캡처 축소 배율 (클수록 빠름, 기본 3)", prefs.downscale)
-        tapMsEdit = numberRow("탭 누름 시간 ms (기본 5)", prefs.tapMs)
+        tapMsEdit = numberRow("탭 누름 시간 ms (기본 40)", prefs.tapMs)
         colorSwitch = switchRow("색상까지 비교 (느리지만 정확)", prefs.useColor)
         simulSwitch = switchRow("여러 개 동시에 탭 (멀티터치)", prefs.simultaneous)
 
@@ -169,10 +169,15 @@ class MainActivity : ComponentActivity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         button("2. 시작") { onStartClicked() }
+        button("3. 탭 테스트 화면 열기 (시작 후)") {
+            startActivity(Intent(this, TestActivity::class.java))
+        }
         button("중지") { startService(Intent(this, CaptureService::class.java).setAction(CaptureService.ACTION_STOP)) }
 
         text(
             "※ 시작하면 화면 공유 창에서 '전체 화면'을 선택하세요.\n" +
+            "※ 실행 중 상태는 알림창을 내리면 보입니다.\n" +
+            "※ 테스트 화면에서 숫자가 올라가면 앱은 정상입니다.\n" +
             "※ 시작 후 게임 화면에 타겟이 처음 보일 때 크기를 자동으로 맞춥니다.\n" +
             "※ 화면을 회전했다면 중지 후 다시 시작하세요.",
             13f
